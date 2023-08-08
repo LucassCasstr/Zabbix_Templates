@@ -1,0 +1,775 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-08-08T17:58:23Z'
+  groups:
+    -
+      uuid: 8f32f702a50a4c7fa964e58591405a5f
+      name: SFIEC
+  templates:
+    -
+      uuid: 6de3fedf442044e9a63fd16c1868da7d
+      template: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+      name: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+      groups:
+        -
+          name: SFIEC
+      items:
+        -
+          uuid: 113e6a2390cc4f7f8bae554bbfb79109
+          name: 'NOME DO HOST AGENTE ZABBIX'
+          key: agent.hostname
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: '0'
+          value_type: TEXT
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE DIPONIBILIDADE'
+        -
+          uuid: 8e99939bf8924121bba230551ec6323c
+          name: 'DISPONIBILIDADE DO AGENTE ZABBIX'
+          key: agent.ping
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE DIPONIBILIDADE'
+        -
+          uuid: c2b74f3e044e431b933283310c797998
+          name: 'VERSÃO DO AGENTE ZABBIX'
+          key: agent.version
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: '0'
+          value_type: TEXT
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE DIPONIBILIDADE'
+        -
+          uuid: 3556447971c242d29b52faf00455d6f1
+          name: DISPONIBILIDADE
+          type: SIMPLE
+          key: icmpping
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE DIPONIBILIDADE'
+          triggers:
+            -
+              uuid: 941aca695d02434aadff11153f77de31
+              expression: 'max(/TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE/icmpping,#30)=0'
+              name: 'O SERVIDOR {HOST.NAME} NÃO RESPONDE A PING!'
+              priority: DISASTER
+              manual_close: 'YES'
+        -
+          uuid: 1d78983247924287b252aab478f602f2
+          name: 'PERDA DE PACOTES (PORCENTAGEM)'
+          type: SIMPLE
+          key: icmppingloss
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE DIPONIBILIDADE'
+          triggers:
+            -
+              uuid: e4be9db746744aa6a969eaf7c40e38f1
+              expression: 'min(/TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE/icmppingloss,2m)>3'
+              name: 'A PERDA DE PACOTE NO SERVIDOR {HOST.NAME} É MUITO ALTA!'
+              status: DISABLED
+              priority: HIGH
+              manual_close: 'YES'
+              dependencies:
+                -
+                  name: 'O SERVIDOR {HOST.NAME} NÃO RESPONDE A PING!'
+                  expression: 'max(/TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE/icmpping,#30)=0'
+        -
+          uuid: 8e35f8e594e44058a8f7327bdf833054
+          name: LATENCIA
+          type: SIMPLE
+          key: icmppingsec
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          units: s
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE DIPONIBILIDADE'
+        -
+          uuid: 782d722538c447ec8377431c6e360170
+          name: 'QUANTIDADE DE USUÁRIOS LOGADOS'
+          key: 'perf_counter["\Terminal Services\Active Sessions"]'
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 5d
+          trends: 10d
+          status: DISABLED
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DO SISTEMA'
+        -
+          uuid: c1333d6176d9420ca9329ce4e4661d9b
+          name: 'CPU EM PORCENTAGEM {system.hostname}'
+          key: 'perf_counter[\Processor(_Total)\% Processor Time]'
+          delay: '0;1s/1-7,05:00-23:59'
+          value_type: FLOAT
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DO PROCESSADOR'
+          triggers:
+            -
+              uuid: 38b47a44879448e5b44b2508baa92fa5
+              expression: 'min(/TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE/perf_counter[\Processor(_Total)\% Processor Time],10s)>75'
+              name: 'O USO DE CPU NO SERVIDOR {HOST.NAME} É MUITO ALTA! (75%)'
+              status: DISABLED
+              priority: WARNING
+              manual_close: 'YES'
+              dependencies:
+                -
+                  name: 'O SERVIDOR {HOST.NAME} NÃO RESPONDE A PING!'
+                  expression: 'max(/TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE/icmpping,#30)=0'
+            -
+              uuid: cc1f6a61df9c4392991e22ad526614ec
+              expression: 'min(/TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE/perf_counter[\Processor(_Total)\% Processor Time],10m)>98'
+              name: 'O USO DE CPU NO SERVIDOR {HOST.NAME} É MUITO ALTA! (98%)'
+              priority: DISASTER
+              manual_close: 'YES'
+              dependencies:
+                -
+                  name: 'O SERVIDOR {HOST.NAME} NÃO RESPONDE A PING!'
+                  expression: 'max(/TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE/icmpping,#30)=0'
+        -
+          uuid: a6c5a2e477914dd2abfbee776f931cfe
+          name: 'QUANTIDADE DE CPU'
+          key: 'ssystem.cpu.num[]'
+          delay: '30s;84600s/1-7,05:00-23:59'
+          units: o
+        -
+          uuid: 4a058cb87d5a4357b4086e3e1d0a9b96
+          name: 'USO DO PROCESSADOR (1M MEDIA)'
+          key: 'system.cpu.load[percpu,avg1]'
+          delay: '0;300s/1-7,05:00-23:59'
+          value_type: FLOAT
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DO PROCESSADOR'
+        -
+          uuid: 9f7b4377e0a54b05935ed4a4e6589410
+          name: 'USO DO PROCESSADOR (5M MEDIA)'
+          key: 'system.cpu.load[percpu,avg5]'
+          delay: '0;300s/1-7,05:00-23:59'
+          value_type: FLOAT
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DO PROCESSADOR'
+        -
+          uuid: fb718ee5b48a4695ad9972a4e26f557b
+          name: 'USO DO PROCESSADOR (15M MEDIA)'
+          key: 'system.cpu.load[percpu,avg15]'
+          delay: '0;300s/1-7,05:00-23:59'
+          status: DISABLED
+          value_type: FLOAT
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DO PROCESSADOR'
+        -
+          uuid: 35595b5cd9a847fba7d98e41db0e8c77
+          name: 'QUANTIDADE DE CPU'
+          key: 'system.cpu.num[]'
+          delay: '0;84600s/1-7,05:00-23:59'
+          value_type: FLOAT
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DO PROCESSADOR'
+        -
+          uuid: 6e2d04c5340549e1bb74c4d739818e17
+          name: 'DATA E HORA EM LOCAL'
+          key: 'system.localtime[local]'
+          delay: '0;5s/1-7,05:00-23:59'
+          trends: '0'
+          value_type: TEXT
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACAO DE DATA E HORA'
+        -
+          uuid: 49b6c30ab2a847e6aff52ed96f37290b
+          name: 'DATA E HORA EM UTC'
+          key: 'system.localtime[utc]'
+          delay: '0;5s/1-7,05:00-23:59'
+          units: unixtime
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACAO DE DATA E HORA'
+        -
+          uuid: 3882ee2e297f43e9bea0ee3f2e5369f1
+          name: 'ARQUITETURA DO SISTEMA OPERACIONAL'
+          key: system.sw.arch
+          delay: '0;30s/1-7,05:00-23:59'
+          trends: '0'
+          status: DISABLED
+          value_type: CHAR
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DO SISTEMA'
+        -
+          uuid: ec0a92b106ff4b798f31522a91b1922c
+          name: 'ESPACO DE TROCA LIVRE'
+          key: 'system.swap.size[,free]'
+          delay: '0;5s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          units: B
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE SWAP'
+        -
+          uuid: 1caf3ae1fada446eb92795af439032f9
+          name: 'ESPACO DE TROCA LIVRE EM PORCENTAGEM'
+          key: 'system.swap.size[,pfree]'
+          delay: '0;15s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE SWAP'
+        -
+          uuid: 25a1338ed4374c779b71decbbd06af74
+          name: 'ESPACO DE TROCA TOTAL'
+          key: 'system.swap.size[,total]'
+          delay: '0;5s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          units: B
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE SWAP'
+        -
+          uuid: 577414418e5d4c4887bdd7014087123d
+          name: 'ESPACO DE TROCA USADO'
+          key: 'system.swap.size[,used]'
+          delay: '0;15s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          units: B
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE SWAP'
+        -
+          uuid: 2c14bed058e84e6daa716d42781570bd
+          name: 'INFORMACOES DO SISTEMA OPERACIONAL'
+          key: system.uname
+          delay: '0;30s/1-7,05:00-23:59'
+          trends: '0'
+          status: DISABLED
+          value_type: TEXT
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DO SISTEMA'
+        -
+          uuid: 3b8e3cade85345b7becbd638146783e8
+          name: 'TEMPO LIGADO DO SISTEMA OPERACIONAL'
+          key: system.uptime
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          units: uptime
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DO SISTEMA'
+        -
+          uuid: e33fe4b09fc548ccb425d08cd1a7cd88
+          name: 'MEMORIA RECONHECIDA'
+          key: 'vm.memory.size[available]'
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          value_type: FLOAT
+          units: B
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE MEMORIA'
+        -
+          uuid: d46808ec04874d9cbf8b4b5c54309c2e
+          name: 'MEMORIA EM CASH'
+          key: 'vm.memory.size[cached]'
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          value_type: FLOAT
+          units: b
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE MEMORIA'
+        -
+          uuid: 47ea21a05db34a85b6d120bf531b0017
+          name: 'MEMORIA DISPONIVEL'
+          key: 'vm.memory.size[free]'
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          value_type: FLOAT
+          units: B
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE MEMORIA'
+        -
+          uuid: 46454c4540054c4bab02be16024ec916
+          name: 'MEMORIA DISPONIVEL EM PORCETAGEM'
+          key: 'vm.memory.size[pavailable]'
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          value_type: FLOAT
+          units: b
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE MEMORIA'
+        -
+          uuid: f65ad6fb365a4c6a8b358980a7621445
+          name: 'MEMORIA EM USO (PORCETAGEM)'
+          key: 'vm.memory.size[pused]'
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE MEMORIA'
+          triggers:
+            -
+              uuid: abb5cbefaa4c450283b85eb9f94c2708
+              expression: 'min(/TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE/vm.memory.size[pused],10m)>75'
+              name: 'O USO DE MEMORIA NO SERVIDOR {HOST.NAME} ESTA EM (75%)'
+              status: DISABLED
+              priority: WARNING
+              manual_close: 'YES'
+              dependencies:
+                -
+                  name: 'O SERVIDOR {HOST.NAME} NÃO RESPONDE A PING!'
+                  expression: 'max(/TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE/icmpping,#30)=0'
+            -
+              uuid: fc22cb151d1b444a9ef6270c8bd2eee7
+              expression: 'min(/TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE/vm.memory.size[pused],10m)>90'
+              name: 'O USO DE MEMORIA NO SERVIDOR {HOST.NAME} ESTA EM (90%)'
+              priority: HIGH
+        -
+          uuid: 5e03b7fbb897470db258f29372f2df5e
+          name: 'MEMORIA TOTAL'
+          key: 'vm.memory.size[total]'
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          value_type: FLOAT
+          units: B
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE MEMORIA'
+        -
+          uuid: 113947786feb4ca3a3a5c4cfa7f95b54
+          name: 'MEMORIA EM USO'
+          key: 'vm.memory.size[used]'
+          delay: '0;30s/1-7,05:00-23:59'
+          history: 60d
+          trends: 90d
+          value_type: FLOAT
+          units: b
+          tags:
+            -
+              tag: Application
+              value: 'INFORMACOES DE MEMORIA'
+      discovery_rules:
+        -
+          uuid: fc9f3f81a34b4f73a7cbb9de89f548bc
+          name: 'DESCOBERTA LLD SERVICO DO WINDOWS'
+          key: service.discovery
+          delay: '84600s;30s/1-7,05:00-23:59'
+          status: DISABLED
+          lifetime: '0'
+          description: 'REGRA DE DESCOBERTA DE SERVIÇO'
+          item_prototypes:
+            -
+              uuid: a17cf2599da74219b87dfeee09e57146
+              name: 'ESTADO DO SERVICO {#SERVICE.NAME} => ({#SERVICE.DISPLAYNAME})'
+              key: 'service.info[{#SERVICE.NAME},state]'
+              delay: 30s
+              history: 60d
+              trends: 90d
+              valuemap:
+                name: 'Windows service state'
+              tags:
+                -
+                  tag: Application
+                  value: 'INFORMACAO DE INICIALIZACAO {#SERVICE.STARTUPNAME}'
+            -
+              uuid: ff96bd37712a4dd4ad758bc9972770ef
+              name: 'USUÁRIO DO SERVICO ({#SERVICE.DISPLAYNAME})'
+              key: 'service.info[{#SERVICE.NAME},user]'
+              delay: 30s
+              history: 60d
+              trends: '0'
+              value_type: TEXT
+              tags:
+                -
+                  tag: Application
+                  value: 'INFORMACAO DE INICIALIZACAO {#SERVICE.STARTUPNAME}'
+          graph_prototypes:
+            -
+              uuid: b551cc73bb0242629b69fda837c0451c
+              name: 'INFORMACOES DO DO SERVIÇO {#SERVICE.NAME}'
+              graph_items:
+                -
+                  color: 199C0D
+                  item:
+                    host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+                    key: 'service.info[{#SERVICE.NAME},state]'
+        -
+          uuid: 7f0028a56eac47079e888636240ce4be
+          name: 'DESCOBERTA LLD CPU'
+          key: system.cpu.discovery
+          delay: '30s;30s/1-7,05:00-23:59'
+          status: DISABLED
+          lifetime: '0'
+          description: 'REGRA DE DESCOBERTA DE CPU'
+          item_prototypes:
+            -
+              uuid: c44f6bef11714417b0921136b8ab94a5
+              name: 'TEMPO DE USO DO PROCESSADOR CPU [{#CPU.NUMBER}] EM 1 MINUTO'
+              key: 'system.cpu.util[{#CPU.NUMBER},system,avg1]'
+              delay: '0;30s/1-7,05:00-23:59'
+              history: 60d
+              trends: 90d
+              value_type: FLOAT
+              tags:
+                -
+                  tag: Application
+                  value: 'INFORMAÇÃO DE USO DE CPU MEDIA DE 1 MINUTO'
+            -
+              uuid: b6da05d7203f43cd89e1114b614b0e40
+              name: 'TEMPO DE USO DO PROCESSADOR CPU [{#CPU.NUMBER}] EM 5 MINUTO'
+              key: 'system.cpu.util[{#CPU.NUMBER},system,avg5]'
+              delay: '0;30s/1-7,05:00-23:59'
+              history: 60d
+              trends: 90d
+              value_type: FLOAT
+              tags:
+                -
+                  tag: Application
+                  value: 'INFORMAÇÃO DE USO DE CPU MEDIA DE 5 MINUTO'
+            -
+              uuid: 6dfc7713a5d04fcc9a641536fdf9b758
+              name: 'TEMPO DE USO DO PROCESSADOR CPU [{#CPU.NUMBER}] EM 15 MINUTO'
+              key: 'system.cpu.util[{#CPU.NUMBER},system,avg15]'
+              delay: '0;30s/1-7,05:00-23:59'
+              history: 60d
+              trends: 90d
+              value_type: FLOAT
+              tags:
+                -
+                  tag: Application
+                  value: 'INFORMAÇÃO DE USO DE CPU MEDIA DE 15 MINUTO'
+            -
+              uuid: b911b0c832504b34bf1a3d5997f4e78f
+              name: 'TEMPO DE USO DO PROCESSADOR CPU [{#CPU.NUMBER}]'
+              key: 'system.cpu.util[{#CPU.NUMBER}]'
+              delay: '0;30s/1-7,05:00-23:59'
+              history: 60d
+              trends: 90d
+              value_type: FLOAT
+              tags:
+                -
+                  tag: Application
+                  value: 'INFORMACOES DE USO DO CPU'
+          graph_prototypes:
+            -
+              uuid: e34d1f5b092c4848bf1e4750f3f76119
+              name: 'INFORMACOES DO USO DO PROCESSADOR {#CPU.NUMBER}'
+              graph_items:
+                -
+                  color: 1A7C11
+                  item:
+                    host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+                    key: 'system.cpu.util[{#CPU.NUMBER},system,avg1]'
+                -
+                  sortorder: '1'
+                  color: F63100
+                  item:
+                    host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+                    key: 'system.cpu.util[{#CPU.NUMBER},system,avg5]'
+                -
+                  sortorder: '2'
+                  color: 2774A4
+                  item:
+                    host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+                    key: 'system.cpu.util[{#CPU.NUMBER},system,avg15]'
+        -
+          uuid: 94e8b0eb111b480c995a60530a1de44c
+          name: 'DESCOBERTA LLD DISCO'
+          key: vfs.fs.discovery
+          delay: '30s;30s/1-7,05:00-23:59'
+          lifetime: '0'
+          description: 'REGRA DE DESCOBERTA DE DISCO'
+          item_prototypes:
+            -
+              uuid: 8dc11ec44a8047b2a6725c728b79f5ed
+              name: 'ESPACO LIVRE DO DISCO {#FSNAME}'
+              key: 'vfs.fs.size[{#FSNAME},free]'
+              delay: '0;30s/1-7,05:00-23:59'
+              history: 60d
+              trends: 90d
+              units: B
+              tags:
+                -
+                  tag: Application
+                  value: 'INFORMACAO DO DISCO'
+            -
+              uuid: d10905cde6c64eec87122b684252ad17
+              name: 'ESPACO LIVRE DO DISCO {#FSNAME} (PORCENTAGEM)'
+              key: 'vfs.fs.size[{#FSNAME},pfree]'
+              delay: '0;30s/1-7,05:00-23:59'
+              history: 60d
+              trends: 90d
+              value_type: FLOAT
+              units: '%'
+              tags:
+                -
+                  tag: Application
+                  value: 'INFORMACAO DO DISCO'
+            -
+              uuid: 52818089cf1840b39c303318e2cde141
+              name: 'ESPACO USADO DO DISCO {#FSNAME} EM PORCETAGEM'
+              key: 'vfs.fs.size[{#FSNAME},pused]'
+              delay: '0;30s/1-7,05:00-23:59'
+              history: 60d
+              trends: 90d
+              value_type: FLOAT
+              units: '%'
+              tags:
+                -
+                  tag: Application
+                  value: 'INFORMACAO DO DISCO'
+              trigger_prototypes:
+                -
+                  uuid: 98b52a5d6e974d31954889f357fdc5ee
+                  expression: 'last(/TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE/vfs.fs.size[{#FSNAME},pused])>95'
+                  name: 'O USO DO {#FSNAME} NO SERVIDOR {HOST.NAME} ESTA EM (95%)'
+                  priority: DISASTER
+            -
+              uuid: d911575824fb4dc6800b2d03c2f2b591
+              name: 'ESPACO TOTAL DO DISCO {#FSNAME}'
+              key: 'vfs.fs.size[{#FSNAME},total]'
+              delay: '5s;30s/1-7,05:00-23:59'
+              history: 60d
+              trends: 90d
+              units: B
+              tags:
+                -
+                  tag: Application
+                  value: 'INFORMACAO DO DISCO'
+            -
+              uuid: ab9a836344344cde8fc8c7336358c269
+              name: 'ESPACO USADO DO DISCO {#FSNAME}'
+              key: 'vfs.fs.size[{#FSNAME},used]'
+              delay: '0;30s/1-7,05:00-23:59'
+              history: 60d
+              trends: 90d
+              units: B
+              tags:
+                -
+                  tag: Application
+                  value: 'INFORMACAO DO DISCO'
+          graph_prototypes:
+            -
+              uuid: 2daf9866e41a4b57ba822244ccc57f42
+              name: 'INFORMACOES DO DISCO {#FSNAME}'
+              graph_items:
+                -
+                  color: 1A7C11
+                  item:
+                    host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+                    key: 'vfs.fs.size[{#FSNAME},free]'
+                -
+                  sortorder: '1'
+                  color: EEEE00
+                  item:
+                    host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+                    key: 'vfs.fs.size[{#FSNAME},total]'
+            -
+              uuid: 913f6664132e4e879b11b3c8725191ba
+              name: 'INFORMACOES DO DISCO {#FSNAME} EM %'
+              graph_items:
+                -
+                  color: 1A7C11
+                  item:
+                    host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+                    key: 'vfs.fs.size[{#FSNAME},pfree]'
+                -
+                  sortorder: '1'
+                  color: EEEE00
+                  item:
+                    host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+                    key: 'vfs.fs.size[{#FSNAME},pused]'
+      valuemaps:
+        -
+          uuid: ea107f4bdee649e6b957509f65101706
+          name: 'Windows service state'
+          mappings:
+            -
+              value: '0'
+              newvalue: Running
+            -
+              value: '1'
+              newvalue: Paused
+            -
+              value: '2'
+              newvalue: 'Start pending'
+            -
+              value: '3'
+              newvalue: 'Pause pending'
+            -
+              value: '4'
+              newvalue: 'Continue pending'
+            -
+              value: '5'
+              newvalue: 'Stop pending'
+            -
+              value: '6'
+              newvalue: Stopped
+            -
+              value: '7'
+              newvalue: Unknown
+            -
+              value: '255'
+              newvalue: 'No such service'
+  graphs:
+    -
+      uuid: a5e57a9d07d744a2a54716d734881f6f
+      name: '01 - DIPONIBILIDADE.'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 199C0D
+          item:
+            host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+            key: icmpping
+    -
+      uuid: 86f7146693cd4129ad3f4c36e6f6eed5
+      name: '02 - LANTENCIA'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 199C0D
+          item:
+            host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+            key: icmppingsec
+    -
+      uuid: ea9d7c68adc84f719e04d915a6ba7b4c
+      name: '03 - PERDA DE PACOTE'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 199C0D
+          item:
+            host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+            key: icmppingloss
+    -
+      uuid: 578c7f2375574314b89135fab1ce3768
+      name: '04 - TEMPO LIGADO'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 199C0D
+          item:
+            host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+            key: system.uptime
+    -
+      uuid: 9e3e425a10ae476c8d5ace970e27aea9
+      name: '06 - MEMORIA.'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 199C0D
+          item:
+            host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+            key: 'vm.memory.size[total]'
+        -
+          sortorder: '1'
+          color: FFFF00
+          item:
+            host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+            key: 'vm.memory.size[used]'
+    -
+      uuid: b7117a484ec54713bfa62594e6b85ddf
+      name: '07 - MEMORIA EM CASH'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 00FF00
+          item:
+            host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+            key: 'vm.memory.size[cached]'
+    -
+      uuid: 9b9ad312c9df4850bb2610cc212004b3
+      name: '07 - MEMORIA EM SWAP'
+      graph_items:
+        -
+          color: 1A7C11
+          item:
+            host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+            key: 'system.swap.size[,total]'
+        -
+          sortorder: '1'
+          color: FFFF33
+          item:
+            host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+            key: 'system.swap.size[,used]'
+    -
+      uuid: dd3ef376c84e46bfa20e116ccc7cf021
+      name: '08 - MEMORIA EM PORCENTAGEM'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 00FF00
+          item:
+            host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+            key: 'vm.memory.size[pavailable]'
+        -
+          sortorder: '1'
+          drawtype: GRADIENT_LINE
+          color: FFFF00
+          item:
+            host: TEMPLATE_BASE_WINDOWS_SFIEC_1.0_AGENTE
+            key: 'vm.memory.size[pused]'
